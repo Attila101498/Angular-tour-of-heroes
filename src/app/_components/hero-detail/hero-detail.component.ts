@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Hero } from 'src/app/_models/hero';
@@ -11,20 +11,36 @@ import { HeroService } from 'src/app/_services/hero.service';
 })
 export class HeroDetailComponent implements OnInit {
 
-  hero: Hero | undefined;
+  hero!: Hero;
 
   constructor(private route: ActivatedRoute,
               private heroService: HeroService,
               private location: Location) { }
 
   ngOnInit(): void {
-    this.getHero();
+    this.getHeroById();
   }
   
-  getHero(): void {
+  getHeroById(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.heroService.getHero(id)
-      .subscribe(hero => this.hero = hero);
+    this.heroService.getHeroById(id).subscribe(hero => {
+      console.log(hero);
+      this.hero = hero;
+    });
+  }
+
+  save(): void {
+    this.heroService.updateHero(this.hero).subscribe(
+      () => this.goBack()
+    );
+  }
+
+  delete(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    confirm("Are you sure you want to delete this hero?") 
+    ? this.heroService.deleteHero(id).subscribe(
+      () => this.goBack()) 
+    : "";
   }
 
   goBack(): void {

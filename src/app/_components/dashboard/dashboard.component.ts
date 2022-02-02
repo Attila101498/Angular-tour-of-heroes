@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Hero } from 'src/app/_models/hero';
 import { HeroService } from 'src/app/_services/hero.service';
 
@@ -8,16 +9,36 @@ import { HeroService } from 'src/app/_services/hero.service';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  heroes: Hero[] = [];
 
-  constructor(private heroService: HeroService) { }
+  heroes: Hero[] = [];
+  heroForm!: FormGroup;
+
+  constructor(private heroService: HeroService,
+              private fb: FormBuilder) { }
 
   ngOnInit(): void {
     this.getHeroes();
+    this.createHeroForm();
   }
 
   getHeroes(): void {
-    this.heroService.getHeroes()
-      .subscribe(heroes => this.heroes = heroes.slice(1, 5));
+    this.heroService.getAllHeroes()
+      .subscribe(data => this.heroes = data);
+  }
+
+  createHeroForm() {
+    this.heroForm = this.fb.group({
+      heroName: ['', Validators.required]
+    });
+  }
+
+  onSubmit() {
+    let obj: Hero = {
+      name: this.heroForm.value.heroName
+    }
+    this.heroService.addHero(obj).subscribe(() => {
+      this.getHeroes();
+    });
+    this.heroForm.reset();
   }
 }
